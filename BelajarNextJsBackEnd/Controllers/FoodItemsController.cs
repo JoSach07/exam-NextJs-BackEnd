@@ -35,27 +35,10 @@ namespace BelajarNextJsBackEnd.Controllers
                 Id = Q.Id,
                 Name = Q.Name,
                 Price = Q.Price,
+                RestaurantId = Q.RestaurantId,
                 RestaurantName = Q.Restaurant.Name
             }).ToListAsync();
         }
-
-        // GET: api/RestaurantFoodItems
-        //[HttpGet]
-        //public async Task<ActionResult<List<FoodItemGridModel>>> GetRestaurantFoodItems(string restaurantId)
-        //{
-        //    if (_context.FoodItems == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    return await _context.FoodItems.AsNoTracking().Where(Q => Q.RestaurantId == restaurantId).Select(Q => new FoodItemGridModel
-        //    {
-        //        Id = Q.Id,
-        //        Name = Q.Name,
-        //        Price = Q.Price,
-        //        RestaurantName = Q.Restaurant.Name,
-        //        CreatedAt = Q.CreatedAt
-        //    }).ToListAsync();
-        //}
 
         // GET: api/FoodItems/5
         [HttpGet("{id}", Name = "GetFoodItemDetail")]
@@ -71,6 +54,7 @@ namespace BelajarNextJsBackEnd.Controllers
                 Id = Q.Id,
                 Name = Q.Name,
                 Price = Q.Price,
+                RestaurantId = Q.RestaurantId,
                 RestaurantName = Q.Restaurant.Name
             }).ToListAsync();
 

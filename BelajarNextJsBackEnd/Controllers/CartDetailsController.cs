@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BelajarNextJsBackEnd.Entities;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using BelajarNextJsBackEnd.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BelajarNextJsBackEnd.Controllers
 {
@@ -35,20 +36,46 @@ namespace BelajarNextJsBackEnd.Controllers
 
         // GET: api/CartDetails/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<CartDetail>> GetCartDetail(string id)
+        public async Task<ActionResult<List<CartGridModel>>> GetCartDetail(string id)
         {
-          if (_context.CartDetails == null)
-          {
-              return NotFound();
-          }
-            var cartDetail = await _context.CartDetails.FindAsync(id);
-
-            if (cartDetail == null)
+            if (_context.CartDetails == null)
             {
-                return NotFound();
+                return Problem("Entity set 'ApplicationDbContext.CartDetails'  is null.");
             }
 
-            return cartDetail;
+            var userId = User.FindFirst(Claims.Subject)?.Value;
+
+            if (userId == null)
+            {
+                userId = "01GXZBZDT9CZRHQF2QCCFBH40N";
+            }
+
+            var cart = await _context.Carts
+                .Where(Q => Q.RestaurantId == id && Q.UserId == userId)
+                .FirstOrDefaultAsync();
+
+            if (cart == null)
+            {
+                return new List<CartGridModel>();
+            }
+
+            var cartItems = await _context.CartDetails
+                .Where(Q => Q.CartId == cart.Id)
+                .ToListAsync();
+
+            var cartList = new List<CartGridModel>();
+
+            foreach(CartDetail item in cartItems)
+            {
+                cartList.Add(new CartGridModel
+                {
+                    Name = item.FoodItem.Name,
+                    Price = item.FoodItem.Price,
+                    Qty = item.Qty
+                });
+            }
+
+            return cartList;
         }
 
         // POST: api/CartDetails/5
@@ -92,7 +119,12 @@ namespace BelajarNextJsBackEnd.Controllers
                 return Problem("Entity set 'ApplicationDbContext.CartDetails'  is null.");
             }
 
-            var userId = User.FindFirst(Claims.Subject)?.Value ?? throw new InvalidOperationException("User ID not found");
+            var userId = User.FindFirst(Claims.Subject)?.Value;
+
+            if (userId == null)
+            {
+                userId = "01GXZBZDT9CZRHQF2QCCFBH40N";
+            }
 
             var cart = await _context.Carts
                 .Where(Q => Q.RestaurantId == model.RestaurantId && Q.UserId == userId)
